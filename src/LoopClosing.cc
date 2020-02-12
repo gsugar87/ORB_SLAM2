@@ -31,7 +31,6 @@
 #include<mutex>
 #include<thread>
 
-
 namespace ORB_SLAM2
 {
 
