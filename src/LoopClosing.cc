@@ -645,7 +645,7 @@ void LoopClosing::RunGlobalBundleAdjustment(unsigned long nLoopKF)
 {
     cout << "Starting Global Bundle Adjustment" << endl;
 
-    int idx =  mnFullBAIdx;
+    int idx = mnFullBAIdx;
     Optimizer::GlobalBundleAdjustemnt(mpMap,10,&mbStopGBA,nLoopKF,false);
 
     // Update all MapPoints and KeyFrames
@@ -654,7 +654,7 @@ void LoopClosing::RunGlobalBundleAdjustment(unsigned long nLoopKF)
     // We need to propagate the correction through the spanning tree
     {
         unique_lock<mutex> lock(mMutexGBA);
-        if(idx!=mnFullBAIdx)
+        if (idx!=mnFullBAIdx)
             return;
 
         if(!mbStopGBA)

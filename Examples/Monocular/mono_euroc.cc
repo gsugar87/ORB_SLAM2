@@ -41,12 +41,15 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    cout << "Loading Images" << endl;
     // Retrieve paths to images
     vector<string> vstrImageFilenames;
     vector<double> vTimestamps;
     LoadImages(string(argv[3]), string(argv[4]), vstrImageFilenames, vTimestamps);
 
     int nImages = vstrImageFilenames.size();
+
+    cout << "Loaded " << nImages << " images" << endl;
 
     if(nImages<=0)
     {
@@ -70,7 +73,7 @@ int main(int argc, char **argv)
     for(int ni=0; ni<nImages; ni++)
     {
         // Read image from file
-        im = cv::imread(vstrImageFilenames[ni],CV_LOAD_IMAGE_UNCHANGED);
+        im = cv::imread(vstrImageFilenames[ni],cv::IMREAD_UNCHANGED);
         double tframe = vTimestamps[ni];
 
         if(im.empty())
