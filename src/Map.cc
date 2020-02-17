@@ -25,14 +25,54 @@
 namespace ORB_SLAM2
 {
 
+bool KFIdComapre::operator ()(const KeyFrame* kfleft,const KeyFrame* kfright) const
+{
+    return kfleft->mnId < kfright->mnId;
+}
+
+
 Map::Map():mnMaxKFid(0),mnBigChangeIdx(0)
 {
 }
 
+
+void Map::UpdateScale (const double &scale) {
+  // cout << "calling Map::updatescale but I commented it out for now" << endl;
+  unique_lock<mutex> lock(mMutexMapUpdate);
+  // for (std::set<KeyFrame*,KFIdComapre>::iterator sit=mspKeyFrames.begin(),
+  //        send=mspKeyFrames.end(); sit!=send; sit++) {
+  for (size_t i = 0; i<mspKeyFrames.size(); i++) {
+    //KeyFrame* pKF = *sit;
+    KeyFrame* pKF = mspKeyFrames[i];
+    cv::Mat Tcw = pKF->GetPose();
+    cv::Mat tcw = Tcw.rowRange(0,3).col(3)*scale;
+    tcw.copyTo(Tcw.rowRange(0,3).col(3));
+    pKF->SetPose(Tcw);
+  }
+
+  for (std::set<MapPoint*>::iterator sit=mspMapPoints.begin(), 
+         send=mspMapPoints.end(); sit!=send; sit++) {
+    MapPoint* pMP = *sit;
+    //pMP->SetWorldPos(pMP->GetWorldPos()*scale);
+    pMP->UpdateScale(scale);
+  }
+  std::cout<<std::endl<<"... Map scale updated ..."<<std::endl<<std::endl;
+}
+
+
 void Map::AddKeyFrame(KeyFrame *pKF)
 {
     unique_lock<mutex> lock(mMutexMap);
-    mspKeyFrames.insert(pKF);
+    cout << "Inserting a new keyframe id: " << pKF->mnId << endl;
+    // mspKeyFrames.insert(pKF);
+    for (std::vector<KeyFrame*>::iterator pit=mspKeyFrames.begin();
+         pit != mspKeyFrames.end(); ++pit) {
+      if ((*pit)->mnId == pKF->mnId) {
+        cout << "Duplicate found! Not inserting" << endl;
+        return;
+      }
+    }
+    mspKeyFrames.push_back(pKF);
     if(pKF->mnId>mnMaxKFid)
         mnMaxKFid=pKF->mnId;
 }
@@ -55,7 +95,14 @@ void Map::EraseMapPoint(MapPoint *pMP)
 void Map::EraseKeyFrame(KeyFrame *pKF)
 {
     unique_lock<mutex> lock(mMutexMap);
-    mspKeyFrames.erase(pKF);
+    std::vector<KeyFrame*>::iterator position = 
+      std::find(mspKeyFrames.begin(), mspKeyFrames.end(), pKF);
+    if (position != mspKeyFrames.end()) {
+      mspKeyFrames.erase(position);
+    } else {
+      cout << "Error erasing the keyframe with mnId = " << pKF->mnId << endl;
+    }
+    // mspKeyFrames.erase(pKF);
 
     // TODO: This only erase the pointer.
     // Delete the MapPoint
@@ -82,7 +129,8 @@ int Map::GetLastBigChangeIdx()
 vector<KeyFrame*> Map::GetAllKeyFrames()
 {
     unique_lock<mutex> lock(mMutexMap);
-    return vector<KeyFrame*>(mspKeyFrames.begin(),mspKeyFrames.end());
+    // return vector<KeyFrame*>(mspKeyFrames.begin(),mspKeyFrames.end());
+    return mspKeyFrames;
 }
 
 vector<MapPoint*> Map::GetAllMapPoints()
@@ -120,8 +168,13 @@ void Map::clear()
     for(set<MapPoint*>::iterator sit=mspMapPoints.begin(), send=mspMapPoints.end(); sit!=send; sit++)
         delete *sit;
 
-    for(set<KeyFrame*>::iterator sit=mspKeyFrames.begin(), send=mspKeyFrames.end(); sit!=send; sit++)
-        delete *sit;
+    //for(set<KeyFrame*>::iterator sit=mspKeyFrames.begin(), send=mspKeyFrames.end(); sit!=send; sit++)
+    //    delete *sit;
+    for (std::vector<KeyFrame*>::iterator sit=mspKeyFrames.begin();
+         sit != mspKeyFrames.end(); ++sit) {
+      cout << "Trying to delete " << (*sit)->mnId << endl;
+      delete *sit;
+    }
 
     mspMapPoints.clear();
     mspKeyFrames.clear();

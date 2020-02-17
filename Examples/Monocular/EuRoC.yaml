@@ -1,4 +1,21 @@
 %YAML:1.0
+# File location for storing vi estimates
+test.InitVIOTmpPath: "/home/gsugar/test_results/"
+
+# Timestamp shift. Timage = Timu + image_delay
+Camera.delaytoimu: 0
+
+# acc = acc*9.8, if below is 1
+IMU.multiplyG: 0
+
+Camera.Tbc:
+ [0.0148655429818, -0.999880929698, 0.00414029679422, -0.0216401454975,
+  0.999557249008, 0.0149672133247, 0.025715529948, -0.064676986768,
+  -0.0257744366974, 0.00375618835797, 0.999660727178, 0.00981073058949,
+  0.0, 0.0, 0.0, 1.0]
+
+# Local Window size
+LocalMapping.LocalWindowSize: 10
 
 #--------------------------------------------------------------------------------------------
 # Camera Parameters. Adjust them!

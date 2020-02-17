@@ -31,6 +31,9 @@
 
 #include <mutex>
 
+#include "ImuData.h"
+#include "NavState.h"
+#include "ImuPreintegrator.h"
 
 namespace ORB_SLAM2
 {
@@ -43,85 +46,135 @@ class KeyFrameDatabase;
 class KeyFrame
 {
 public:
-    KeyFrame(Frame &F, Map* pMap, KeyFrameDatabase* pKFDB);
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    // Pose functions
-    void SetPose(const cv::Mat &Tcw);
-    cv::Mat GetPose();
-    cv::Mat GetPoseInverse();
-    cv::Mat GetCameraCenter();
-    cv::Mat GetStereoCenter();
-    cv::Mat GetRotation();
-    cv::Mat GetTranslation();
+  KeyFrame(Frame &F, Map* pMap, KeyFrameDatabase* pKFDB,
+           std::vector<IMUData> vIMUData, KeyFrame* pLastKF=NULL);
+  KeyFrame* GetPrevKeyFrame();
+  KeyFrame* GetNextKeyFrame();
+  void SetPrevKeyFrame(KeyFrame* pKF);
+  void SetNextKeyFrame(KeyFrame* pKF);
 
-    // Bag of Words Representation
-    void ComputeBoW();
+  std::vector<IMUData> GetVectorIMUData();
+  void Append/* IMUDataToFront(KeyFrame* pPrevKF); */
+/*   void ComputePreInt(); */
 
-    // Covisibility graph functions
-    void AddConnection(KeyFrame* pKF, const int &weight);
-    void EraseConnection(KeyFrame* pKF);
-    void UpdateConnections();
-    void UpdateBestCovisibles();
-    std::set<KeyFrame *> GetConnectedKeyFrames();
-    std::vector<KeyFrame* > GetVectorCovisibleKeyFrames();
-    std::vector<KeyFrame*> GetBestCovisibilityKeyFrames(const int &N);
-    std::vector<KeyFrame*> GetCovisiblesByWeight(const int &w);
-    int GetWeight(KeyFrame* pKF);
+/*   const IMUPreintegrator & GetIMUPreInt(); */
+/*   void UpdateNavStatePVRFromTcw(const cv::Mat &Tcw,const cv::Mat &Tbc); */
+/*   void UpdatePoseFromNS(const cv::Mat &Tbc); */
+/*   void UpdateNavState(const IMUPreintegrator& imupreint, const Vector3d& gw); */
+/*   void SetNavState(const NavState& ns); */
+/*   const NavState& GetNavState(); */
+/*   void SetNavStateVel(const Vector3d &vel); */
+/*   void SetNavStatePos(const Vector3d &pos); */
+/*   void SetNavStateRot(const Matrix3d &rot); */
+/*   void SetNavStateRot(const Sophus::SO3 &rot); */
+/*   void SetNavStateBiasGyr(const Vector3d &bg); */
+/*   void SetNavStateBiasAcc(const Vector3d &ba); */
+/*   void SetNavStateDeltaBg(const Vector3d &dbg); */
+/*   void SetNavStateDeltaBa(const Vector3d &dba); */
 
-    // Spanning tree functions
-    void AddChild(KeyFrame* pKF);
-    void EraseChild(KeyFrame* pKF);
-    void ChangeParent(KeyFrame* pKF);
-    std::set<KeyFrame*> GetChilds();
-    KeyFrame* GetParent();
-    bool hasChild(KeyFrame* pKF);
+/*   void SetInitialNavStateAndBias(const NavState& ns); */
 
-    // Loop Edges
-    void AddLoopEdge(KeyFrame* pKF);
-    std::set<KeyFrame*> GetLoopEdges();
+/*   // Variables used by loop closing */
+/*   NavState mNavStateGBA;       //mTcwGBA */
+/*   NavState mNavStateBefGBA;    //mTcwBefGBA */
 
-    // MapPoint observation functions
-    void AddMapPoint(MapPoint* pMP, const size_t &idx);
-    void EraseMapPointMatch(const size_t &idx);
-    void EraseMapPointMatch(MapPoint* pMP);
-    void ReplaceMapPointMatch(const size_t &idx, MapPoint* pMP);
-    std::set<MapPoint*> GetMapPoints();
-    std::vector<MapPoint*> GetMapPointMatches();
-    int TrackedMapPoints(const int &minObs);
-    MapPoint* GetMapPoint(const size_t &idx);
+/* protected: */
+/*   std::mutex mMutexPrevKF; */
+/*   std::mutex mMutexNextKF; */
+/*   KeyFrame* mpPrevKeyFrame; */
+/*   KeyFrame* mpNextKeyFrame; */
 
-    // KeyPoint functions
-    std::vector<size_t> GetFeaturesInArea(const float &x, const float  &y, const float  &r) const;
-    cv::Mat UnprojectStereo(int i);
+/*   // P, V, R, bg, ba, delta_bg, delta_ba (delta_bx is for optimization update) */
+/*   std::mutex mMutexNavState; */
+/*   NavState mNavState; */
 
-    // Image
-    bool IsInImage(const float &x, const float &y) const;
+/*   // IMU Data from lask KeyFrame to this KeyFrame */
+/*   std::mutex mMutexIMUData; */
+/*   std::vector<IMUData> mvIMUData; */
+/*   IMUPreintegrator mIMUPreInt; */
 
-    // Enable/Disable bad flag changes
-    void SetNotErase();
-    void SetErase();
+/* public: */
+/*     KeyFrame(Frame &F, Map* pMap, KeyFrameDatabase* pKFDB); */
 
-    // Set/check bad flag
-    void SetBadFlag();
-    bool isBad();
+/*     // Pose functions */
+/*     void SetPose(const cv::Mat &Tcw); */
+/*     cv::Mat GetPose(); */
+/*     cv::Mat GetPoseInverse(); */
+/*     cv::Mat GetCameraCenter(); */
+/*     cv::Mat GetStereoCenter(); */
+/*     cv::Mat GetRotation(); */
+/*     cv::Mat GetTranslation(); */
 
-    // Compute Scene Depth (q=2 median). Used in monocular.
-    float ComputeSceneMedianDepth(const int q);
+/*     // Bag of Words Representation */
+/*     void ComputeBoW(); */
 
-    static bool weightComp( int a, int b){
-        return a>b;
-    }
+/*     // Covisibility graph functions */
+/*     void AddConnection(KeyFrame* pKF, const int &weight); */
+/*     void EraseConnection(KeyFrame* pKF); */
+/*     void UpdateConnections(); */
+/*     void UpdateBestCovisibles(); */
+/*     std::set<KeyFrame *> GetConnectedKeyFrames(); */
+/*     std::vector<KeyFrame* > GetVectorCovisibleKeyFrames(); */
+/*     std::vector<KeyFrame*> GetBestCovisibilityKeyFrames(const int &N); */
+/*     std::vector<KeyFrame*> GetCovisiblesByWeight(const int &w); */
+/*     int GetWeight(KeyFrame* pKF); */
 
-    static bool lId(KeyFrame* pKF1, KeyFrame* pKF2){
-        return pKF1->mnId<pKF2->mnId;
-    }
+/*     // Spanning tree functions */
+/*     void AddChild(KeyFrame* pKF); */
+/*     void EraseChild(KeyFrame* pKF); */
+/*     void ChangeParent(KeyFrame* pKF); */
+/*     std::set<KeyFrame*> GetChilds(); */
+/*     KeyFrame* GetParent(); */
+/*     bool hasChild(KeyFrame* pKF); */
+
+/*     // Loop Edges */
+/*     void AddLoopEdge(KeyFrame* pKF); */
+/*     std::set<KeyFrame*> GetLoopEdges(); */
+
+/*     // MapPoint observation functions */
+/*     void AddMapPoint(MapPoint* pMP, const size_t &idx); */
+/*     void EraseMapPointMatch(const size_t &idx); */
+/*     void EraseMapPointMatch(MapPoint* pMP); */
+/*     void ReplaceMapPointMatch(const size_t &idx, MapPoint* pMP); */
+/*     std::set<MapPoint*> GetMapPoints(); */
+/*     std::vector<MapPoint*> GetMapPointMatches(); */
+/*     int TrackedMapPoints(const int &minObs); */
+/*     MapPoint* GetMapPoint(const size_t &idx); */
+
+/*     // KeyPoint functions */
+/*     std::vector<size_t> GetFeaturesInArea(const float &x, const float  &y, const float  &r) const; */
+/*     cv::Mat UnprojectStereo(int i); */
+
+/*     // Image */
+/*     bool IsInImage(const float &x, const float &y) const; */
+
+/*     // Enable/Disable bad flag changes */
+/*     void SetNotErase(); */
+/*     void SetErase(); */
+
+/*     // Set/check bad flag */
+/*     void SetBadFlag(); */
+/*     bool isBad(); */
+
+/*     // Compute Scene Depth (q=2 median). Used in monocular. */
+/*     float ComputeSceneMedianDepth(const int q); */
+
+/*     static bool weightComp( int a, int b){ */
+/*         return a>b; */
+/*     } */
+
+/*     static bool lId(KeyFrame* pKF1, KeyFrame* pKF2){ */
+/*         return pKF1->mnId<pKF2->mnId; */
+/*     } */
 
 
-    // The following variables are accesed from only 1 thread or never change (no mutex needed).
-public:
+/*     // The following variables are accesed from only 1 thread or never change (no mutex needed). */
+/* public: */
 
-    static long unsigned int nNextId;
-    long unsigned int mnId;
+/*     static long unsigned int nNextId; */
+/*     long unsigned int mnId; */
     const long unsigned int mnFrameId;
 
     const double mTimeStamp;

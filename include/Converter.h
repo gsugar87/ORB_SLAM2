@@ -27,12 +27,18 @@
 #include"Thirdparty/g2o/g2o/types/types_six_dof_expmap.h"
 #include"Thirdparty/g2o/g2o/types/types_seven_dof_expmap.h"
 
+#include "ImuPreintegrator.h"
+#include "NavState.h"
+
 namespace ORB_SLAM2
 {
 
 class Converter
 {
 public:
+    static void updateNS(NavState& ns, const IMUPreintegrator& imupreint, const Vector3d& gw);
+    static cv::Mat toCvMatInverse(const cv::Mat &T12);
+
     static std::vector<cv::Mat> toDescriptorVector(const cv::Mat &Descriptors);
 
     static g2o::SE3Quat toSE3Quat(const cv::Mat &cvT);

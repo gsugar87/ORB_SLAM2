@@ -42,6 +42,10 @@ IF(UNIX)
   MESSAGE(STATUS "Compiling on Unix")
 ENDIF(UNIX)
 
+# For building the CHOLMOD / CSPARSE solvers
+FIND_PACKAGE(BLAS REQUIRED)
+FIND_PACKAGE(LAPACK REQUIRED)
+
 # Eigen library parallelise itself, though, presumably due to performance issues
 # OPENMP is experimental. We experienced some slowdown with it
 FIND_PACKAGE(OpenMP)
@@ -171,4 +175,14 @@ g2o/stuff/os_specific.h
 g2o/stuff/string_tools.cpp
 g2o/stuff/property.cpp       
 g2o/stuff/property.h       
+
+#added
+g2o/stuff/sparse_helper.cpp
+g2o/stuff/sparse_helper.h
+g2o/solvers/linear_solver_cholmod.h
+g2o/solvers/linear_solver_eigen.h
+g2o/solvers/linear_solver_dense.h
+g2o/core/optimization_algorithm_gauss_newton.cpp
+g2o/core/optimization_algorithm_gauss_newton.h
+
 )

@@ -1,22 +1,22 @@
 /**
-* This file is part of ORB-SLAM2.
-*
-* Copyright (C) 2014-2016 Raúl Mur-Artal <raulmur at unizar dot es> (University of Zaragoza)
-* For more information see <https://github.com/raulmur/ORB_SLAM2>
-*
-* ORB-SLAM2 is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* ORB-SLAM2 is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with ORB-SLAM2. If not, see <http://www.gnu.org/licenses/>.
-*/
+ * This file is part of ORB-SLAM2.
+ *
+ * Copyright (C) 2014-2016 Raúl Mur-Artal <raulmur at unizar dot es> (University of Zaragoza)
+ * For more information see <https://github.com/raulmur/ORB_SLAM2>
+ *
+ * ORB-SLAM2 is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * ORB-SLAM2 is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with ORB-SLAM2. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #ifndef LOCALMAPPING_H
 #define LOCALMAPPING_H
@@ -29,18 +29,61 @@
 
 #include <mutex>
 
+#include "ConfigParam.h"
 
-namespace ORB_SLAM2
-{
+namespace ORB_SLAM2 {
 
-class Tracking;
-class LoopClosing;
-class Map;
+  class Tracking;
+  class LoopClosing;
+  class Map;
 
-class LocalMapping
-{
-public:
-    LocalMapping(Map* pMap, const float bMonocular);
+  class LocalMapping {
+  public:
+    ConfigParam* mpParams;
+
+    // KeyFrames in Local Window, for Local BA
+    // Insert in ProcessNewKeyFrame()
+    void AddToLocalWindow(KeyFrame* pKF);
+    void DeleteBadInLocalWindow();
+
+    bool TryInitVIO();
+    bool TryInitStereoVIO();
+    bool GetVINSInited();
+    void SetVINSInited(bool flag);
+
+    bool GetFirstVINSInited();
+    void SetFirstVINSInited(bool flag);
+
+    cv::Mat GetGravityVec();
+
+    bool GetMapUpdateFlagForTracking();
+    void SetMapUpdateFlagInTracking(bool bflag);
+    KeyFrame* GetMapUpdateKF();
+
+  protected:
+    double mnStartTime;
+    bool mbFirstTry;
+    double mnVINSInitScale;
+    cv::Mat mGravityVec; // gravity vector in world frame
+
+    std::mutex mMutexVINSInitFlag;
+    bool mbVINSInited;
+
+    std::mutex mMutexFirstVINSInitFlag;
+    bool mbFirstVINSInited;
+
+    unsigned int mnLocalWindowSize;
+    std::list<KeyFrame*> mlLocalKeyFrames;
+
+    std::mutex mMutexMapUpdateFlag;
+    bool mbMapUpdateFlagForTracking;
+    KeyFrame* mpMapUpdateKF;
+
+    bool mbUseImu;
+  public:
+    // LocalMapping(Map* pMap, const float bMonocular);
+    LocalMapping(Map* pMap, const float bMonocular, ConfigParam* pParams,
+                 bool bUseImu=false);
 
     void SetLoopCloser(LoopClosing* pLoopCloser);
 
@@ -68,12 +111,11 @@ public:
     bool isFinished();
 
     int KeyframesInQueue(){
-        unique_lock<std::mutex> lock(mMutexNewKFs);
-        return mlNewKeyFrames.size();
+      unique_lock<std::mutex> lock(mMutexNewKFs);
+      return mlNewKeyFrames.size();
     }
 
-protected:
-
+  protected:
     bool CheckNewKeyFrames();
     void ProcessNewKeyFrame();
     void CreateNewMapPoints();
@@ -121,7 +163,7 @@ protected:
 
     bool mbAcceptKeyFrames;
     std::mutex mMutexAccept;
-};
+  };
 
 } //namespace ORB_SLAM
 

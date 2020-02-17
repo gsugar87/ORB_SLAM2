@@ -32,6 +32,10 @@
 
 #include <opencv2/opencv.hpp>
 
+#include "ImuData.h"
+#include "ImuPreintegrator.h"
+#include "NavState.h"
+
 namespace ORB_SLAM2
 {
 #define FRAME_GRID_ROWS 48
@@ -43,19 +47,53 @@ class KeyFrame;
 class Frame
 {
 public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  // Constructor for Monocular cameras + IMU data
+  Frame(const cv::Mat &imGray, const double &timeStamp, 
+        const std::vector<ORB_SLAM2::IMUData> &vImu,
+        ORBextractor* extractor, ORBVocabulary* voc, 
+        cv::Mat &K, cv::Mat &distCoef, const float &bf, const float &thDepth);
+  
+  // IMU Data since the previous frame
+  std::vector<ORB_SLAM2::IMUData> mvImuDataSinceLastFrame;
+  
+  void ComputeIMUPreIntSinceLastFrame(const Frame* pLastF, IMUPreintegrator& IMUPreInt) const;
+  void UpdatePoseFromNS(const cv::Mat &Tbc);
+  void SetInitialNavStateAndBias(const NavState& ns);
+  void UpdateNavState(const IMUPreintegrator& imupreint, const Vector3d& gw);  
+  const NavState& GetNavState() const;
+  void SetNavState(const NavState& ns);
+  void SetNavStateBiasGyr(const Vector3d &bg);
+  void SetNavStateBiasAcc(const Vector3d &ba);
+  Matrix<double, 15, 15> mMargCovInv;
+  NavState mNavStatePrior;
+
+protected:
+  NavState mNavState;
+
+public:
     Frame();
 
     // Copy constructor.
     Frame(const Frame &frame);
 
     // Constructor for stereo cameras.
-    Frame(const cv::Mat &imLeft, const cv::Mat &imRight, const double &timeStamp, ORBextractor* extractorLeft, ORBextractor* extractorRight, ORBVocabulary* voc, cv::Mat &K, cv::Mat &distCoef, const float &bf, const float &thDepth);
+    Frame(const cv::Mat &imLeft, const cv::Mat &imRight, 
+          const double &timeStamp, ORBextractor* extractorLeft, 
+          ORBextractor* extractorRight, ORBVocabulary* voc, 
+          cv::Mat &K, cv::Mat &distCoef, const float &bf, const float &thDepth);
 
     // Constructor for RGB-D cameras.
-    Frame(const cv::Mat &imGray, const cv::Mat &imDepth, const double &timeStamp, ORBextractor* extractor,ORBVocabulary* voc, cv::Mat &K, cv::Mat &distCoef, const float &bf, const float &thDepth);
+    Frame(const cv::Mat &imGray, const cv::Mat &imDepth, 
+          const double &timeStamp, 
+          ORBextractor* extractor,ORBVocabulary* voc, 
+          cv::Mat &K, cv::Mat &distCoef, const float &bf, const float &thDepth);
 
     // Constructor for Monocular cameras.
-    Frame(const cv::Mat &imGray, const double &timeStamp, ORBextractor* extractor,ORBVocabulary* voc, cv::Mat &K, cv::Mat &distCoef, const float &bf, const float &thDepth);
+    Frame(const cv::Mat &imGray, const double &timeStamp, 
+          ORBextractor* extractor,ORBVocabulary* voc, 
+          cv::Mat &K, cv::Mat &distCoef, const float &bf, const float &thDepth);
 
     // Extract ORB on the image. 0 for left image and 1 for right image.
     void ExtractORB(int flag, const cv::Mat &im);

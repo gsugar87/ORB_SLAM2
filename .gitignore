@@ -21,6 +21,7 @@ Thirdparty/backup
 Vocabulary/ORBvoc.txt
 Vocabulary/ORBvoc.bin
 build/
+build_debug/
 *~
 lib/
 

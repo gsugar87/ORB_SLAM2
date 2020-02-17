@@ -38,6 +38,9 @@
 #include "MapDrawer.h"
 #include "System.h"
 
+#include "ImuData.h"
+#include "ConfigParam.h"
+
 #include <mutex>
 
 namespace ORB_SLAM2
@@ -52,15 +55,45 @@ class System;
 
 class Tracking
 {  
+public:
+  EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+
+  // Flags for relocalization. Create new KF once bias re-computed & flag for preparation for bias re-compute
+  bool mbCreateNewKFAfterReloc;
+  bool mbRelocBiasPrepare;
+  void RecomputeIMUBiasAndCurrentNavstate(NavState& nscur);
+  // 20 Frames are used to compute bias
+  vector<Frame> mv20FramesReloc;
+
+  // Predict the NavState of Current Frame by IMU
+  void PredictNavStateByIMU(bool bMapUpdated);
+  IMUPreintegrator mIMUPreIntInTrack;
+
+  bool TrackWithIMU(bool bMapUpdated=false);  
+  bool TrackLocalMapWithIMU(bool bMapUpdated=false);
+    
+  std::vector<ORB_SLAM2::IMUData> mvIMUSinceLastKF;
+  IMUPreintegrator GetIMUPreIntSinceLastKF(Frame* pCurF, KeyFrame* pLastKF, 
+                                           const std::vector<IMUData>& vIMUSInceLastKF);
+  IMUPreintegrator GetIMUPreIntSinceLastFrame(Frame* pCurF, Frame* pLastF);
 
 public:
-    Tracking(System* pSys, ORBVocabulary* pVoc, FrameDrawer* pFrameDrawer, MapDrawer* pMapDrawer, Map* pMap,
-             KeyFrameDatabase* pKFDB, const string &strSettingPath, const int sensor);
+    Tracking(System* pSys, ORBVocabulary* pVoc, FrameDrawer* pFrameDrawer, 
+             MapDrawer* pMapDrawer, Map* pMap,
+             KeyFrameDatabase* pKFDB, const string &strSettingPath, 
+             const int sensor);
+
+    Tracking(System* pSys, ORBVocabulary* pVoc, FrameDrawer* pFrameDrawer, 
+             MapDrawer* pMapDrawer, Map* pMap,
+             KeyFrameDatabase* pKFDB, const string &strSettingPath, 
+             const int sensor, const bool bUseImu);
 
     // Preprocess the input and call Track(). Extract features and performs stereo matching.
     cv::Mat GrabImageStereo(const cv::Mat &imRectLeft,const cv::Mat &imRectRight, const double &timestamp);
     cv::Mat GrabImageRGBD(const cv::Mat &imRGB,const cv::Mat &imD, const double &timestamp);
     cv::Mat GrabImageMonocular(const cv::Mat &im, const double &timestamp);
+    cv::Mat GrabImageMonoImu(const cv::Mat &im, const double &timestamp,
+                             const std::vector<ORB_SLAM2::IMUData> &vBufferImuData);
 
     void SetLocalMapper(LocalMapping* pLocalMapper);
     void SetLoopClosing(LoopClosing* pLoopClosing);
@@ -112,6 +145,9 @@ public:
 
     // True if local mapping is deactivated and we are performing only localization
     bool mbOnlyTracking;
+
+    // True if we want to use the imu data in tracking
+    bool bUseImu;
 
     void Reset();
 

@@ -35,10 +35,18 @@ namespace ORB_SLAM2
 class MapPoint;
 class KeyFrame;
 
+class KFIdComapre {
+ public:
+  bool operator()(const KeyFrame* kfleft,const KeyFrame* kfright) const;
+};
+
 class Map
 {
 public:
     Map();
+
+    // Update after an absoulte scale is available
+    void UpdateScale(const double &scale);
 
     void AddKeyFrame(KeyFrame* pKF);
     void AddMapPoint(MapPoint* pMP);
@@ -68,7 +76,8 @@ public:
 
 protected:
     std::set<MapPoint*> mspMapPoints;
-    std::set<KeyFrame*> mspKeyFrames;
+    // std::set<KeyFrame*> mspKeyFrames;
+    std::vector<KeyFrame*> mspKeyFrames;
 
     std::vector<MapPoint*> mvpReferenceMapPoints;
 

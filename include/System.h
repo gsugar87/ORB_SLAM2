@@ -36,6 +36,7 @@
 #include "KeyFrameDatabase.h"
 #include "ORBVocabulary.h"
 #include "Viewer.h"
+#include "ImuData.h"
 
 namespace ORB_SLAM2
 {
@@ -60,7 +61,10 @@ public:
 public:
 
     // Initialize the SLAM system. It launches the Local Mapping, Loop Closing and Viewer threads.
-    System(const string &strVocFile, const string &strSettingsFile, const eSensor sensor, const bool bUseViewer = true);
+    System(const string &strVocFile, const string &strSettingsFile, 
+           const eSensor sensor, const bool bUseViewer);
+    System(const string &strVocFile, const string &strSettingsFile, 
+           const eSensor sensor, const bool bUseImu, const bool bUseViewer);
 
     // Proccess the given stereo frame. Images must be synchronized and rectified.
     // Input images: RGB (CV_8UC3) or grayscale (CV_8U). RGB is converted to grayscale.
@@ -77,6 +81,12 @@ public:
     // Input images: RGB (CV_8UC3) or grayscale (CV_8U). RGB is converted to grayscale.
     // Returns the camera pose (empty if tracking fails).
     cv::Mat TrackMonocular(const cv::Mat &im, const double &timestamp);
+    
+    // Proccess the given monocular frame with IMU data
+    // Input images: RGB (CV_8UC3) or grayscale (CV_8U). RGB is converted to grayscale.
+    // Returns the camera pose (empty if tracking fails).
+    cv::Mat TrackMonoImu(const cv::Mat &im, const double &timestamp,
+                         const std::vector<ORB_SLAM2::IMUData> &vBufferImuData);
 
     // This stops local mapping thread (map building) and performs only camera tracking.
     void ActivateLocalizationMode();
