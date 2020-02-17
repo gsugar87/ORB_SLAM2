@@ -734,7 +734,6 @@ namespace ORB_SLAM2
       cout << "Visual Initialization worked!" << endl;
     } else {
       // System is initialized. Track Frame.
-      cout << "System is initialized inside track()" << endl;
       bool bOK;
       
       // Initial camera pose estimation using motion model or relocalization (if tracking is lost)

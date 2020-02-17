@@ -56,125 +56,125 @@ public:
   void SetNextKeyFrame(KeyFrame* pKF);
 
   std::vector<IMUData> GetVectorIMUData();
-  void Append/* IMUDataToFront(KeyFrame* pPrevKF); */
-/*   void ComputePreInt(); */
+  void AppendIMUDataToFront(KeyFrame* pPrevKF);
+  void ComputePreInt();
 
-/*   const IMUPreintegrator & GetIMUPreInt(); */
-/*   void UpdateNavStatePVRFromTcw(const cv::Mat &Tcw,const cv::Mat &Tbc); */
-/*   void UpdatePoseFromNS(const cv::Mat &Tbc); */
-/*   void UpdateNavState(const IMUPreintegrator& imupreint, const Vector3d& gw); */
-/*   void SetNavState(const NavState& ns); */
-/*   const NavState& GetNavState(); */
-/*   void SetNavStateVel(const Vector3d &vel); */
-/*   void SetNavStatePos(const Vector3d &pos); */
-/*   void SetNavStateRot(const Matrix3d &rot); */
-/*   void SetNavStateRot(const Sophus::SO3 &rot); */
-/*   void SetNavStateBiasGyr(const Vector3d &bg); */
-/*   void SetNavStateBiasAcc(const Vector3d &ba); */
-/*   void SetNavStateDeltaBg(const Vector3d &dbg); */
-/*   void SetNavStateDeltaBa(const Vector3d &dba); */
+  const IMUPreintegrator & GetIMUPreInt();
+  void UpdateNavStatePVRFromTcw(const cv::Mat &Tcw,const cv::Mat &Tbc);
+  void UpdatePoseFromNS(const cv::Mat &Tbc);
+  void UpdateNavState(const IMUPreintegrator& imupreint, const Vector3d& gw);
+  void SetNavState(const NavState& ns);
+  const NavState& GetNavState();
+  void SetNavStateVel(const Vector3d &vel);
+  void SetNavStatePos(const Vector3d &pos);
+  void SetNavStateRot(const Matrix3d &rot);
+  void SetNavStateRot(const Sophus::SO3 &rot);
+  void SetNavStateBiasGyr(const Vector3d &bg);
+  void SetNavStateBiasAcc(const Vector3d &ba);
+  void SetNavStateDeltaBg(const Vector3d &dbg);
+  void SetNavStateDeltaBa(const Vector3d &dba);
 
-/*   void SetInitialNavStateAndBias(const NavState& ns); */
+  void SetInitialNavStateAndBias(const NavState& ns);
 
-/*   // Variables used by loop closing */
-/*   NavState mNavStateGBA;       //mTcwGBA */
-/*   NavState mNavStateBefGBA;    //mTcwBefGBA */
+  // Variables used by loop closing
+  NavState mNavStateGBA;       //mTcwGBA
+  NavState mNavStateBefGBA;    //mTcwBefGBA
 
-/* protected: */
-/*   std::mutex mMutexPrevKF; */
-/*   std::mutex mMutexNextKF; */
-/*   KeyFrame* mpPrevKeyFrame; */
-/*   KeyFrame* mpNextKeyFrame; */
+protected:
+  std::mutex mMutexPrevKF;
+  std::mutex mMutexNextKF;
+  KeyFrame* mpPrevKeyFrame;
+  KeyFrame* mpNextKeyFrame;
 
-/*   // P, V, R, bg, ba, delta_bg, delta_ba (delta_bx is for optimization update) */
-/*   std::mutex mMutexNavState; */
-/*   NavState mNavState; */
+  // P, V, R, bg, ba, delta_bg, delta_ba (delta_bx is for optimization update)
+  std::mutex mMutexNavState;
+  NavState mNavState;
 
-/*   // IMU Data from lask KeyFrame to this KeyFrame */
-/*   std::mutex mMutexIMUData; */
-/*   std::vector<IMUData> mvIMUData; */
-/*   IMUPreintegrator mIMUPreInt; */
+  // IMU Data from lask KeyFrame to this KeyFrame
+  std::mutex mMutexIMUData;
+  std::vector<IMUData> mvIMUData;
+  IMUPreintegrator mIMUPreInt;
 
-/* public: */
-/*     KeyFrame(Frame &F, Map* pMap, KeyFrameDatabase* pKFDB); */
+public:
+    KeyFrame(Frame &F, Map* pMap, KeyFrameDatabase* pKFDB);
 
-/*     // Pose functions */
-/*     void SetPose(const cv::Mat &Tcw); */
-/*     cv::Mat GetPose(); */
-/*     cv::Mat GetPoseInverse(); */
-/*     cv::Mat GetCameraCenter(); */
-/*     cv::Mat GetStereoCenter(); */
-/*     cv::Mat GetRotation(); */
-/*     cv::Mat GetTranslation(); */
+    // Pose functions
+    void SetPose(const cv::Mat &Tcw);
+    cv::Mat GetPose();
+    cv::Mat GetPoseInverse();
+    cv::Mat GetCameraCenter();
+    cv::Mat GetStereoCenter();
+    cv::Mat GetRotation();
+    cv::Mat GetTranslation();
 
-/*     // Bag of Words Representation */
-/*     void ComputeBoW(); */
+    // Bag of Words Representation
+    void ComputeBoW();
 
-/*     // Covisibility graph functions */
-/*     void AddConnection(KeyFrame* pKF, const int &weight); */
-/*     void EraseConnection(KeyFrame* pKF); */
-/*     void UpdateConnections(); */
-/*     void UpdateBestCovisibles(); */
-/*     std::set<KeyFrame *> GetConnectedKeyFrames(); */
-/*     std::vector<KeyFrame* > GetVectorCovisibleKeyFrames(); */
-/*     std::vector<KeyFrame*> GetBestCovisibilityKeyFrames(const int &N); */
-/*     std::vector<KeyFrame*> GetCovisiblesByWeight(const int &w); */
-/*     int GetWeight(KeyFrame* pKF); */
+    // Covisibility graph functions
+    void AddConnection(KeyFrame* pKF, const int &weight);
+    void EraseConnection(KeyFrame* pKF);
+    void UpdateConnections();
+    void UpdateBestCovisibles();
+    std::set<KeyFrame *> GetConnectedKeyFrames();
+    std::vector<KeyFrame* > GetVectorCovisibleKeyFrames();
+    std::vector<KeyFrame*> GetBestCovisibilityKeyFrames(const int &N);
+    std::vector<KeyFrame*> GetCovisiblesByWeight(const int &w);
+    int GetWeight(KeyFrame* pKF);
 
-/*     // Spanning tree functions */
-/*     void AddChild(KeyFrame* pKF); */
-/*     void EraseChild(KeyFrame* pKF); */
-/*     void ChangeParent(KeyFrame* pKF); */
-/*     std::set<KeyFrame*> GetChilds(); */
-/*     KeyFrame* GetParent(); */
-/*     bool hasChild(KeyFrame* pKF); */
+    // Spanning tree functions
+    void AddChild(KeyFrame* pKF);
+    void EraseChild(KeyFrame* pKF);
+    void ChangeParent(KeyFrame* pKF);
+    std::set<KeyFrame*> GetChilds();
+    KeyFrame* GetParent();
+    bool hasChild(KeyFrame* pKF);
 
-/*     // Loop Edges */
-/*     void AddLoopEdge(KeyFrame* pKF); */
-/*     std::set<KeyFrame*> GetLoopEdges(); */
+    // Loop Edges
+    void AddLoopEdge(KeyFrame* pKF);
+    std::set<KeyFrame*> GetLoopEdges();
 
-/*     // MapPoint observation functions */
-/*     void AddMapPoint(MapPoint* pMP, const size_t &idx); */
-/*     void EraseMapPointMatch(const size_t &idx); */
-/*     void EraseMapPointMatch(MapPoint* pMP); */
-/*     void ReplaceMapPointMatch(const size_t &idx, MapPoint* pMP); */
-/*     std::set<MapPoint*> GetMapPoints(); */
-/*     std::vector<MapPoint*> GetMapPointMatches(); */
-/*     int TrackedMapPoints(const int &minObs); */
-/*     MapPoint* GetMapPoint(const size_t &idx); */
+    // MapPoint observation functions
+    void AddMapPoint(MapPoint* pMP, const size_t &idx);
+    void EraseMapPointMatch(const size_t &idx);
+    void EraseMapPointMatch(MapPoint* pMP);
+    void ReplaceMapPointMatch(const size_t &idx, MapPoint* pMP);
+    std::set<MapPoint*> GetMapPoints();
+    std::vector<MapPoint*> GetMapPointMatches();
+    int TrackedMapPoints(const int &minObs);
+    MapPoint* GetMapPoint(const size_t &idx);
 
-/*     // KeyPoint functions */
-/*     std::vector<size_t> GetFeaturesInArea(const float &x, const float  &y, const float  &r) const; */
-/*     cv::Mat UnprojectStereo(int i); */
+    // KeyPoint functions
+    std::vector<size_t> GetFeaturesInArea(const float &x, const float  &y, const float  &r) const;
+    cv::Mat UnprojectStereo(int i);
 
-/*     // Image */
-/*     bool IsInImage(const float &x, const float &y) const; */
+    // Image
+    bool IsInImage(const float &x, const float &y) const;
 
-/*     // Enable/Disable bad flag changes */
-/*     void SetNotErase(); */
-/*     void SetErase(); */
+    // Enable/Disable bad flag changes
+    void SetNotErase();
+    void SetErase();
 
-/*     // Set/check bad flag */
-/*     void SetBadFlag(); */
-/*     bool isBad(); */
+    // Set/check bad flag
+    void SetBadFlag();
+    bool isBad();
 
-/*     // Compute Scene Depth (q=2 median). Used in monocular. */
-/*     float ComputeSceneMedianDepth(const int q); */
+    // Compute Scene Depth (q=2 median). Used in monocular.
+    float ComputeSceneMedianDepth(const int q);
 
-/*     static bool weightComp( int a, int b){ */
-/*         return a>b; */
-/*     } */
+    static bool weightComp( int a, int b){
+        return a>b;
+    }
 
-/*     static bool lId(KeyFrame* pKF1, KeyFrame* pKF2){ */
-/*         return pKF1->mnId<pKF2->mnId; */
-/*     } */
+    static bool lId(KeyFrame* pKF1, KeyFrame* pKF2){
+        return pKF1->mnId<pKF2->mnId;
+    }
 
 
-/*     // The following variables are accesed from only 1 thread or never change (no mutex needed). */
-/* public: */
+    // The following variables are accesed from only 1 thread or never change (no mutex needed).
+public:
 
-/*     static long unsigned int nNextId; */
-/*     long unsigned int mnId; */
+    static long unsigned int nNextId;
+    long unsigned int mnId;
     const long unsigned int mnFrameId;
 
     const double mTimeStamp;
