@@ -591,13 +591,13 @@ namespace ORB_SLAM2
     vnIndexEdgeMono.reserve(N);
 
     // for Stereo
-    vector<g2o::EdgeStereoNavStatePVRPointXYZOnlyPose*> vpEdgesStereo;
-    vector<size_t> vnIndexEdgeStereo;
-    vpEdgesStereo.reserve(N);
-    vnIndexEdgeStereo.reserve(N);
+    // vector<g2o::EdgeStereoNavStatePVRPointXYZOnlyPose*> vpEdgesStereo;
+    // vector<size_t> vnIndexEdgeStereo;
+    // vpEdgesStereo.reserve(N);
+    // vnIndexEdgeStereo.reserve(N);
 
     const float deltaMono = sqrt(5.991);
-    const float deltaStereo = sqrt(7.815);
+    // const float deltaStereo = sqrt(7.815);
 
     {
       unique_lock<mutex> lock(MapPoint::mGlobalMutex);
@@ -682,7 +682,7 @@ namespace ORB_SLAM2
     // We perform 4 optimizations, after each optimization we classify observation as inlier/outlier
     // At the next optimization, outliers are not included, but at the end they can be classified as inliers again.
     const float chi2Mono[4] = {5.991, 5.991, 5.991, 5.991};
-    const float chi2Stereo[4]={7.815,7.815,7.815, 7.815};
+    // const float chi2Stereo[4]={7.815,7.815,7.815, 7.815};
     const int its[4] = {10, 10, 10, 10};
 
     //    //Debug log
@@ -1259,7 +1259,7 @@ namespace ORB_SLAM2
     }
 
     const float thHuber2D = sqrt(5.99);
-    const float thHuber3D = sqrt(7.815);
+    // const float thHuber3D = sqrt(7.815);
 
     // Set MapPoint vertices
     for (size_t i=0; i<vpMP.size(); i++) {
@@ -1312,6 +1312,8 @@ namespace ORB_SLAM2
 
           optimizer.addEdge(e);
         } else {
+          cout << "Stereo not supported" << endl;
+          /*
           Eigen::Matrix<double,3,1> obs;
           const float kp_ur = pKF->mvuRight[mit->second];
           obs << kpUn.pt.x, kpUn.pt.y, kp_ur;
@@ -1340,6 +1342,7 @@ namespace ORB_SLAM2
           e->bf = pKF->mbf;
 
           optimizer.addEdge(e);
+          */
         }
       }
 
@@ -1426,13 +1429,13 @@ namespace ORB_SLAM2
     vpEdgesMono.reserve(N);
     vnIndexEdgeMono.reserve(N);
 
-    vector<g2o::EdgeStereoSE3ProjectXYZOnlyPose*> vpEdgesStereo;
-    vector<size_t> vnIndexEdgeStereo;
-    vpEdgesStereo.reserve(N);
-    vnIndexEdgeStereo.reserve(N);
+    // vector<g2o::EdgeStereoSE3ProjectXYZOnlyPose*> vpEdgesStereo;
+    // vector<size_t> vnIndexEdgeStereo;
+    // vpEdgesStereo.reserve(N);
+    // vnIndexEdgeStereo.reserve(N);
 
     const float deltaMono = sqrt(5.991);
-    const float deltaStereo = sqrt(7.815);
+    // const float deltaStereo = sqrt(7.815);
 
 
     {
@@ -1480,6 +1483,8 @@ namespace ORB_SLAM2
                 }
               else  // Stereo observation
                 {
+                  cout << "Stereo not implemented!" << endl;
+                  /*
                   nInitialCorrespondences++;
                   pFrame->mvbOutlier[i] = false;
 
@@ -1515,6 +1520,7 @@ namespace ORB_SLAM2
 
                   vpEdgesStereo.push_back(e);
                   vnIndexEdgeStereo.push_back(i);
+                  */
                 }
             }
 
@@ -1528,7 +1534,7 @@ namespace ORB_SLAM2
     // We perform 4 optimizations, after each optimization we classify observation as inlier/outlier
     // At the next optimization, outliers are not included, but at the end they can be classified as inliers again.
     const float chi2Mono[4]={5.991,5.991,5.991,5.991};
-    const float chi2Stereo[4]={7.815,7.815,7.815, 7.815};
+    // const float chi2Stereo[4]={7.815,7.815,7.815, 7.815};
     const int its[4]={10,10,10,10};
 
     int nBad=0;
@@ -1568,7 +1574,7 @@ namespace ORB_SLAM2
             if(it==2)
               e->setRobustKernel(0);
           }
-
+        /* 
         for(size_t i=0, iend=vpEdgesStereo.size(); i<iend; i++)
           {
             g2o::EdgeStereoSE3ProjectXYZOnlyPose* e = vpEdgesStereo[i];
@@ -1597,7 +1603,7 @@ namespace ORB_SLAM2
             if(it==2)
               e->setRobustKernel(0);
           }
-
+        */
         if(optimizer.edges().size()<10)
           break;
       }

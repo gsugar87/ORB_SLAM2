@@ -1,6 +1,7 @@
 %YAML:1.0
 # File location for storing vi estimates
 test.InitVIOTmpPath: "/home/gsugar/test_results/"
+test.saveVIEstimates: 1
 
 # Timestamp shift. Timage = Timu + image_delay
 Camera.delaytoimu: 0
