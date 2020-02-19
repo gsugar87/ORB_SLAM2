@@ -16,7 +16,7 @@ Camera.Tbc:
   0.0, 0.0, 0.0, 1.0]
 
 # Local Window size
-LocalMapping.LocalWindowSize: 10
+LocalMapping.LocalWindowSize: 5
 LocalMapping.MinVIOInitTime: -10.0
 
 #--------------------------------------------------------------------------------------------

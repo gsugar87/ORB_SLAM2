@@ -664,6 +664,14 @@ namespace ORB_SLAM2
     return mTrackingState;
   }
 
+  double System::GetScale() {
+    return mpLocalMapper->GetScale();
+  }
+
+  cv::Mat System::GetGravityVec() {
+    return mpLocalMapper->GetGravityVec();
+  }
+
   vector<MapPoint*> System::GetTrackedMapPoints()
   {
     unique_lock<mutex> lock(mMutexState);

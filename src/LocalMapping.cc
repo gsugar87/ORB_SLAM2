@@ -68,7 +68,7 @@ namespace ORB_SLAM2
     if (mpMap->KeyFramesInMap() <= mnLocalWindowSize)
       return false;
     
-    cout << "Inside TryInitVIO with lots of key frames" << endl;
+    // cout << "Inside TryInitVIO with lots of key frames" << endl;
 
     // Write the data to a file if you want
     static bool fopened = false;
@@ -485,6 +485,10 @@ namespace ORB_SLAM2
     return mGravityVec.clone();
   }
 
+  double LocalMapping::GetScale() {
+    return mnVINSInitScale;
+  }
+
   bool LocalMapping::GetMapUpdateFlagForTracking() {
     unique_lock<mutex> lock(mMutexMapUpdateFlag);
     return mbMapUpdateFlagForTracking;
@@ -545,7 +549,7 @@ namespace ORB_SLAM2
           if (mpMap->KeyFramesInMap()>2) {
             if (!GetVINSInited()) {
               // Optimizer::LocalBundleAdjustment(mpCurrentKeyFrame,&mbAbortBA, mpMap);
-              cout << "THIS SHOULD BE CALLED RIGHT AFTER VINSInited!!!" << endl;
+              // cout << "THIS SHOULD BE CALLED RIGHT AFTER VINSInited!!!" << endl;
               Optimizer::LocalBundleAdjustment(mpCurrentKeyFrame,&mbAbortBA, mpMap, this);
             } else {
               Optimizer::LocalBundleAdjustmentNavState(mpCurrentKeyFrame, mlLocalKeyFrames,

@@ -133,6 +133,9 @@ public:
     std::vector<MapPoint*> GetTrackedMapPoints();
     std::vector<cv::KeyPoint> GetTrackedKeyPointsUn();
 
+    double GetScale();
+    cv::Mat GetGravityVec();
+
 private:
 
     // Input sensor

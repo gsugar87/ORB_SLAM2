@@ -63,7 +63,7 @@ void Map::UpdateScale (const double &scale) {
 void Map::AddKeyFrame(KeyFrame *pKF)
 {
     unique_lock<mutex> lock(mMutexMap);
-    cout << "Inserting a new keyframe id: " << pKF->mnId << endl;
+    // cout << "Inserting a new keyframe id: " << pKF->mnId << endl;
     // mspKeyFrames.insert(pKF);
     for (std::vector<KeyFrame*>::iterator pit=mspKeyFrames.begin();
          pit != mspKeyFrames.end(); ++pit) {

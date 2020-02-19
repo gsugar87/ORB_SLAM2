@@ -59,6 +59,7 @@ namespace ORB_SLAM2 {
     bool GetMapUpdateFlagForTracking();
     void SetMapUpdateFlagInTracking(bool bflag);
     KeyFrame* GetMapUpdateKF();
+    double GetScale();
 
   protected:
     double mnStartTime;

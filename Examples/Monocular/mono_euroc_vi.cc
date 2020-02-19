@@ -142,6 +142,10 @@ int main(int argc, char **argv) {
 
       double ttrack= std::chrono::duration_cast<std::chrono::duration<double> >(t2 - t1).count();
 
+      // Print the scale
+      // cout << "Scale: " << SLAM.GetScale();
+      // cout << "Gravity: " << SLAM.GetGravityVec().t();
+
       vTimesTrack[ni]=ttrack;
 
       // Wait to load the next frame

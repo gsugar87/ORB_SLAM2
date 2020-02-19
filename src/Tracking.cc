@@ -706,17 +706,17 @@ namespace ORB_SLAM2
     // Different operation, according to whether the map is updated
     bool bMapUpdated = false;
     if (mpLocalMapper->GetMapUpdateFlagForTracking()) {
-      cout << "local mapper getmapupdateflag triggered bmapupdated=true" << endl;
+      // cout << "local mapper getmapupdateflag triggered bmapupdated=true" << endl;
       bMapUpdated = true;
       mpLocalMapper->SetMapUpdateFlagInTracking(false);
     }
     if (mpLoopClosing->GetMapUpdateFlagForTracking()) {
-      cout << "loop closing getmapupdateflag triggered bmapupdated=true" << endl;
+      // cout << "loop closing getmapupdateflag triggered bmapupdated=true" << endl;
       bMapUpdated = true;
       mpLoopClosing->SetMapUpdateFlagInTracking(false);
     }
     if (mCurrentFrame.mnId == mnLastRelocFrameId + 20) {
-      cout << "reloc frame id + 20 triggered bmapupdated=true" << endl;
+      // cout << "reloc frame id + 20 triggered bmapupdated=true" << endl;
       bMapUpdated = true;
     }
 
