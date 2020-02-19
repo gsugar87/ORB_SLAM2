@@ -736,7 +736,8 @@ namespace ORB_SLAM2
       // System is initialized. Track Frame.
       bool bOK;
       
-      // Initial camera pose estimation using motion model or relocalization (if tracking is lost)
+      // Initial camera pose estimation using motion model or relocalization
+      // (if tracking is lost)
       if (!mbOnlyTracking) {
         // Local Mapping is activated. This is the normal behaviour, unless
         // you explicitly activate the "only tracking" mode.
@@ -1030,82 +1031,75 @@ namespace ORB_SLAM2
       }
   }
 
-  void Tracking::MonocularInitialization()
-  {
+  void Tracking::MonocularInitialization() {
+    if(!mpInitializer) {
+      // Clear imu data
+      mvIMUSinceLastKF.clear();
 
-    if(!mpInitializer)
-      {
-        // Set Reference Frame
-        if(mCurrentFrame.mvKeys.size()>100)
-          {
-            mInitialFrame = Frame(mCurrentFrame);
-            mLastFrame = Frame(mCurrentFrame);
-            mvbPrevMatched.resize(mCurrentFrame.mvKeysUn.size());
-            for(size_t i=0; i<mCurrentFrame.mvKeysUn.size(); i++)
-              mvbPrevMatched[i]=mCurrentFrame.mvKeysUn[i].pt;
+      // Set Reference Frame
+      if (mCurrentFrame.mvKeys.size() > 100) {
+        mInitialFrame = Frame(mCurrentFrame);
+        mLastFrame = Frame(mCurrentFrame);
+        mvbPrevMatched.resize(mCurrentFrame.mvKeysUn.size());
+        for (size_t i=0; i<mCurrentFrame.mvKeysUn.size(); i++) {
+          mvbPrevMatched[i]=mCurrentFrame.mvKeysUn[i].pt;
+        }
 
-            if(mpInitializer)
-              delete mpInitializer;
+        if(mpInitializer)
+          delete mpInitializer;
 
-            mpInitializer =  new Initializer(mCurrentFrame,1.0,200);
+        mpInitializer =  new Initializer(mCurrentFrame,1.0,200);
 
-            fill(mvIniMatches.begin(),mvIniMatches.end(),-1);
+        fill(mvIniMatches.begin(),mvIniMatches.end(),-1);
 
-            return;
-          }
+        return;
       }
-    else
-      {
-        // Try to initialize
-        if((int)mCurrentFrame.mvKeys.size()<=100)
-          {
-            delete mpInitializer;
-            mpInitializer = static_cast<Initializer*>(NULL);
-            fill(mvIniMatches.begin(),mvIniMatches.end(),-1);
-            return;
+    } else {
+      // Try to initialize
+      if ((int)mCurrentFrame.mvKeys.size()<=100) {
+        delete mpInitializer;
+        mpInitializer = static_cast<Initializer*>(NULL);
+        fill(mvIniMatches.begin(),mvIniMatches.end(),-1);
+        return;
+      }
+
+      // Find correspondences
+      ORBmatcher matcher(0.9,true);
+      int nmatches = matcher.SearchForInitialization(mInitialFrame,mCurrentFrame,mvbPrevMatched,mvIniMatches,100);
+
+      // Check if there are enough correspondences
+      if (nmatches<100) {
+        delete mpInitializer;
+        mpInitializer = static_cast<Initializer*>(NULL);
+        return;
+      }
+
+      cv::Mat Rcw; // Current Camera Rotation
+      cv::Mat tcw; // Current Camera Translation
+      vector<bool> vbTriangulated; // Triangulated Correspondences (mvIniMatches)
+
+      if (mpInitializer->Initialize(mCurrentFrame, mvIniMatches, Rcw, tcw,
+                                    mvIniP3D, vbTriangulated)) {
+        for (size_t i=0, iend=mvIniMatches.size(); i<iend;i++) {
+          if(mvIniMatches[i]>=0 && !vbTriangulated[i]) {
+            mvIniMatches[i]=-1;
+            nmatches--;
           }
+        }
 
-        // Find correspondences
-        ORBmatcher matcher(0.9,true);
-        int nmatches = matcher.SearchForInitialization(mInitialFrame,mCurrentFrame,mvbPrevMatched,mvIniMatches,100);
+        // Set Frame Poses
+        mInitialFrame.SetPose(cv::Mat::eye(4,4,CV_32F));
+        cv::Mat Tcw = cv::Mat::eye(4,4,CV_32F);
+        Rcw.copyTo(Tcw.rowRange(0,3).colRange(0,3));
+        tcw.copyTo(Tcw.rowRange(0,3).col(3));
+        mCurrentFrame.SetPose(Tcw);
 
-        // Check if there are enough correspondences
-        if(nmatches<100)
-          {
-            delete mpInitializer;
-            mpInitializer = static_cast<Initializer*>(NULL);
-            return;
-          }
-
-        cv::Mat Rcw; // Current Camera Rotation
-        cv::Mat tcw; // Current Camera Translation
-        vector<bool> vbTriangulated; // Triangulated Correspondences (mvIniMatches)
-
-        if(mpInitializer->Initialize(mCurrentFrame, mvIniMatches, Rcw, tcw, mvIniP3D, vbTriangulated))
-          {
-            for(size_t i=0, iend=mvIniMatches.size(); i<iend;i++)
-              {
-                if(mvIniMatches[i]>=0 && !vbTriangulated[i])
-                  {
-                    mvIniMatches[i]=-1;
-                    nmatches--;
-                  }
-              }
-
-            // Set Frame Poses
-            mInitialFrame.SetPose(cv::Mat::eye(4,4,CV_32F));
-            cv::Mat Tcw = cv::Mat::eye(4,4,CV_32F);
-            Rcw.copyTo(Tcw.rowRange(0,3).colRange(0,3));
-            tcw.copyTo(Tcw.rowRange(0,3).col(3));
-            mCurrentFrame.SetPose(Tcw);
-
-            CreateInitialMapMonocular();
+        CreateInitialMapMonocular();
           }
       }
   }
 
-  void Tracking::CreateInitialMapMonocular()
-  {
+  void Tracking::CreateInitialMapMonocular() {
     // Create KeyFrames
     //KeyFrame* pKFini = new KeyFrame(mInitialFrame,mpMap,mpKeyFrameDB);
     //KeyFrame* pKFcur = new KeyFrame(mCurrentFrame,mpMap,mpKeyFrameDB);
@@ -1140,7 +1134,7 @@ namespace ORB_SLAM2
       if(mvIniMatches[i]<0)
         continue;
 
-      //Create MapPoint.
+      // Create MapPoint
       cv::Mat worldPos(mvIniP3D[i]);
 
       MapPoint* pMP = new MapPoint(worldPos,pKFcur,mpMap);
@@ -1169,7 +1163,7 @@ namespace ORB_SLAM2
     // Bundle Adjustment
     cout << "New Map created with " << mpMap->MapPointsInMap() << " points" << endl;
 
-    Optimizer::GlobalBundleAdjustemnt(mpMap,20);
+    Optimizer::GlobalBundleAdjustemnt(mpMap, 20);
 
     // Set median depth to 1
     float medianDepth = pKFini->ComputeSceneMedianDepth(2);
@@ -1420,7 +1414,7 @@ namespace ORB_SLAM2
     SearchLocalPoints();
 
     // Map updated, optimize with last KeyFrame
-    if (mpLocalMapper->GetFirstVINSInited()) {  // || bMapUpdated)
+    if (mpLocalMapper->GetFirstVINSInited() || bMapUpdated) {
       // Get initial pose from Last KeyFrame
       IMUPreintegrator imupreint = GetIMUPreIntSinceLastKF(&mCurrentFrame, mpLastKeyFrame, mvIMUSinceLastKF);
       

@@ -30,8 +30,9 @@ namespace ORB_SLAM2
 
   LocalMapping::LocalMapping(Map *pMap, const float bMonocular,
                              ConfigParam* pParams, bool bUseImu):
-    mbFirstTry(true), mbVINSInited(false),mbFirstVINSInited(false), mbUseImu(bUseImu),
-    mbMonocular(bMonocular), mbResetRequested(false), 
+    mbFirstTry(true), mbVINSInited(false), mbFirstVINSInited(false),
+    mbMapUpdateFlagForTracking(false), mbUseImu(bUseImu),
+    mbMonocular(bMonocular), mbResetRequested(false),
     mbFinishRequested(false), mbFinished(true), mpMap(pMap),
     mbAbortBA(false), mbStopped(false), mbStopRequested(false), 
     mbNotStop(false), mbAcceptKeyFrames(true)
@@ -362,11 +363,12 @@ namespace ORB_SLAM2
     // Todo:
     // Add some logic or strategy to confirm init status
     bool bVIOInited = false;
-    if(mbFirstTry) {
+    if (mbFirstTry) {
       mbFirstTry = false;
       mnStartTime = mpCurrentKeyFrame->mTimeStamp;
     }
-    if (mpCurrentKeyFrame->mTimeStamp - mnStartTime >= 15.0) {
+    if (mpCurrentKeyFrame->mTimeStamp - mnStartTime >=
+        mpParams->GetMinVIOInitTime() && mpParams->GetMinVIOInitTime() >= 0) {
       bVIOInited = true;
     }
 
@@ -543,6 +545,7 @@ namespace ORB_SLAM2
           if (mpMap->KeyFramesInMap()>2) {
             if (!GetVINSInited()) {
               // Optimizer::LocalBundleAdjustment(mpCurrentKeyFrame,&mbAbortBA, mpMap);
+              cout << "THIS SHOULD BE CALLED RIGHT AFTER VINSInited!!!" << endl;
               Optimizer::LocalBundleAdjustment(mpCurrentKeyFrame,&mbAbortBA, mpMap, this);
             } else {
               Optimizer::LocalBundleAdjustmentNavState(mpCurrentKeyFrame, mlLocalKeyFrames,
@@ -559,15 +562,12 @@ namespace ORB_SLAM2
               initSuccess = TryInitVIO();
             }
             
-            cout << "Commented out  SetVINSInited(initSuccess);" << endl;
-            // SetVINSInited(initSuccess);
+            SetVINSInited(initSuccess);
             if (initSuccess) {
-              cout << "commented out updatemap scale and set first vinsinited(true)" << endl;
-              /*
+              cout << "TryInitVIO was successful" << endl;
               // Update the map scale
               mpMap->UpdateScale(mnVINSInitScale);
               SetFirstVINSInited(true);
-              */
             }
           }
           

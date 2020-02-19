@@ -16,6 +16,7 @@ Camera.Tbc:
 
 # Local Window size
 LocalMapping.LocalWindowSize: 10
+LocalMapping.MinVIOInitTime: -10.0
 
 #--------------------------------------------------------------------------------------------
 # Camera Parameters. Adjust them!

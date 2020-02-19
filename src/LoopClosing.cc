@@ -63,27 +63,24 @@ void LoopClosing::SetLocalMapper(LocalMapping *pLocalMapper)
 }
 
 
-void LoopClosing::Run()
-{
-    mbFinished =false;
+void LoopClosing::Run() {
+  mbFinished =false;
 
-    while(1)
-    {
-        // Check if there are keyframes in the queue
-        if(CheckNewKeyFrames())
-        {
-            // Detect loop candidates and check covisibility consistency
-            if(DetectLoop())
-            {
-               // Compute similarity transformation [sR|t]
-               // In the stereo/RGBD case s=1
-               if(ComputeSim3())
-               {
-                   // Perform loop fusion and pose graph optimization
-                   CorrectLoop();
-               }
-            }
-        }       
+  while (1) {
+    // Check if there are keyframes in the queue
+    if (CheckNewKeyFrames()) {
+      // Detect loop candidates and check covisibility consistency
+      if (DetectLoop()) {
+        // Only close loop if the VINS is inited
+        if (mpLocalMapper->GetVINSInited()) {
+          // Compute similarity transformation [sR|t]
+          if (ComputeSim3()) {
+            // Perform loop fusion and pose graph optimization
+            CorrectLoop();
+          }
+        }
+      }
+    }
 
         ResetIfRequested();
 
@@ -573,8 +570,13 @@ void LoopClosing::CorrectLoop()
     }
 
     // Optimize graph
-    Optimizer::OptimizeEssentialGraph(mpMap, mpMatchedKF, mpCurrentKF, NonCorrectedSim3, CorrectedSim3, LoopConnections, mbFixScale);
+    // Optimizer::OptimizeEssentialGraph(mpMap, mpMatchedKF, mpCurrentKF, NonCorrectedSim3, CorrectedSim3, LoopConnections, mbFixScale);
+    Optimizer::OptimizeEssentialGraph(mpMap, mpMatchedKF, mpCurrentKF,
+                                      NonCorrectedSim3, CorrectedSim3,
+                                      LoopConnections, mbFixScale, this);
 
+    // Map updates, set flag for Tracking
+    SetMapUpdateFlagInTracking(true);
     mpMap->InformNewBigChange();
 
     // Add loop edge
@@ -589,6 +591,8 @@ void LoopClosing::CorrectLoop()
 
     // Loop closed. Release Local Mapping.
     mpLocalMapper->Release();    
+
+    cout << "Loop Closed!" << endl;
 
     mLastLoopKFid = mpCurrentKF->mnId;   
 }
@@ -656,7 +660,9 @@ void LoopClosing::RunGlobalBundleAdjustment(unsigned long nLoopKF)
     cout << "Starting Global Bundle Adjustment" << endl;
 
     int idx = mnFullBAIdx;
-    Optimizer::GlobalBundleAdjustemnt(mpMap,10,&mbStopGBA,nLoopKF,false);
+    // Optimizer::GlobalBundleAdjustemnt(mpMap, 10, &mbStopGBA, nLoopKF, false);
+    Optimizer::GlobalBundleAdjustmentNavState(mpMap, mpLocalMapper->GetGravityVec(),
+                                              10, &mbStopGBA, nLoopKF, false);
 
     // Update all MapPoints and KeyFrames
     // Local Mapping was active during BA, that means that there might be new keyframes
@@ -745,6 +751,8 @@ void LoopClosing::RunGlobalBundleAdjustment(unsigned long nLoopKF)
                 }
             }            
 
+            // Map updates, set flag for Tracking
+            SetMapUpdateFlagInTracking(true);
             mpMap->InformNewBigChange();
 
             mpLocalMapper->Release();

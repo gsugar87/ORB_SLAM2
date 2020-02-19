@@ -202,6 +202,43 @@ namespace ORB_SLAM2
     return mIMUPreInt;
   }
 
+  void KeyFrame::UpdateNavStatePVRFromTcw(const cv::Mat &Tcw,const cv::Mat &Tbc) {
+    unique_lock<mutex> lock(mMutexNavState);
+    cv::Mat Twb = Converter::toCvMatInverse(Tbc*Tcw);
+    Matrix3d Rwb = Converter::toMatrix3d(Twb.rowRange(0,3).colRange(0,3));
+    Vector3d Pwb = Converter::toVector3d(Twb.rowRange(0,3).col(3));
+
+    Matrix3d Rw1 = mNavState.Get_RotMatrix();
+    Vector3d Vw1 = mNavState.Get_V();
+    Vector3d Vw2 = Rwb*Rw1.transpose()*Vw1;   // bV1 = bV2 ==> Rwb1^T*wV1 = Rwb2^T*wV2 ==> wV2 = Rwb2*Rwb1^T*wV1
+
+    mNavState.Set_Pos(Pwb);
+    mNavState.Set_Rot(Rwb);
+    mNavState.Set_Vel(Vw2);
+  }
+
+  void KeyFrame::UpdatePoseFromNS(const cv::Mat &Tbc) {
+    cv::Mat Rbc_ = Tbc.rowRange(0,3).colRange(0,3).clone();
+    cv::Mat Pbc_ = Tbc.rowRange(0,3).col(3).clone();
+
+    cv::Mat Rwb_ = Converter::toCvMat(mNavState.Get_RotMatrix());
+    cv::Mat Pwb_ = Converter::toCvMat(mNavState.Get_P());
+
+    cv::Mat Rcw_ = (Rwb_*Rbc_).t();
+    cv::Mat Pwc_ = Rwb_*Pbc_ + Pwb_;
+    cv::Mat Pcw_ = -Rcw_*Pwc_;
+
+    cv::Mat Tcw_ = cv::Mat::eye(4,4,CV_32F);
+    Rcw_.copyTo(Tcw_.rowRange(0,3).colRange(0,3));
+    Pcw_.copyTo(Tcw_.rowRange(0,3).col(3));
+
+    SetPose(Tcw_);
+  }
+
+  void KeyFrame::UpdateNavState(const IMUPreintegrator& imupreint, const Vector3d& gw) {
+    unique_lock<mutex> lock(mMutexNavState);
+    Converter::updateNS(mNavState,imupreint,gw);
+  }
 
   void KeyFrame::SetNavState(const NavState& ns) {
     unique_lock<mutex> lock(mMutexNavState);
