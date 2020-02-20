@@ -5,6 +5,8 @@ IF(NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE Release)
 ENDIF()
 
+set(CMAKE_CXX_STANDARD 14)
+
 IF(CMAKE_BUILD_TYPE MATCHES Release)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
@@ -83,14 +85,15 @@ ${LAPACK_LIBRARIES}
 
 # Build examples
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Examples/RGB-D)
+#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Examples/RGB-D)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Examples/RGB-D)
 
 #add_executable(rgbd_tum
 #Examples/RGB-D/rgbd_tum.cc)
 #target_link_libraries(rgbd_tum ${PROJECT_NAME})
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Examples/Stereo)
-
+#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Examples/Stereo)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Examples/Stereo)
 #add_executable(stereo_kitti
 #Examples/Stereo/stereo_kitti.cc)
 #target_link_libraries(stereo_kitti ${PROJECT_NAME})
@@ -100,8 +103,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Examples/Stereo)
 #target_link_libraries(stereo_euroc ${PROJECT_NAME})
 
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Examples/Monocular)
-
+#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Examples/Monocular)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Examples/Monocular)
 #add_executable(mono_tum
 #Examples/Monocular/mono_tum.cc)
 #target_link_libraries(mono_tum ${PROJECT_NAME})
@@ -117,3 +120,8 @@ target_link_libraries(mono_euroc ${PROJECT_NAME})
 add_executable(mono_euroc_vi
 Examples/Monocular/mono_euroc_vi.cc)
 target_link_libraries(mono_euroc_vi ${PROJECT_NAME})
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/Vocabulary)
+add_executable(bin_vocabulary
+Vocabulary/bin_vocabulary.cc)
+target_link_libraries(bin_vocabulary ${PROJECT_NAME})

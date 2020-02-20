@@ -672,6 +672,10 @@ namespace ORB_SLAM2
     return mpLocalMapper->GetGravityVec();
   }
 
+  void System::SetUseImu(bool bflag) {
+    mpLocalMapper->SetUseImu(bflag);
+  }
+
   vector<MapPoint*> System::GetTrackedMapPoints()
   {
     unique_lock<mutex> lock(mMutexState);
@@ -682,6 +686,10 @@ namespace ORB_SLAM2
   {
     unique_lock<mutex> lock(mMutexState);
     return mTrackedKeyPointsUn;
+  }
+
+  cv::Mat System::GetVelocity() {
+    return mpTracker->GetVelocity();
   }
 
 } //namespace ORB_SLAM

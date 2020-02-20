@@ -134,7 +134,12 @@ public:
     std::vector<cv::KeyPoint> GetTrackedKeyPointsUn();
 
     double GetScale();
+
     cv::Mat GetGravityVec();
+
+    void SetUseImu(bool bflag);
+
+    cv::Mat GetVelocity();
 
 private:
 

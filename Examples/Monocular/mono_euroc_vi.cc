@@ -132,16 +132,33 @@ int main(int argc, char **argv) {
       }
       // cout << "Imu buffer size for image " << ni << ": " << vBufferImuData.size() << endl;
 
+      if (ni % 50 == 0) {
+        if (useImu) {
+          useImu = false;
+          cout << "useimu = false"  << endl;
+        } else {
+          useImu = true;
+          cout << "useimu = true"  << endl;
+        }
+        SLAM.SetUseImu(useImu);
+      }
+
       std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
 
       // Pass the image to the SLAM system
       // SLAM.TrackMonocular(im,tframe);
-      SLAM.TrackMonoImu(im, tframe, vBufferImuData);
+      cv::Mat Tcw = SLAM.TrackMonoImu(im, tframe, vBufferImuData);
 
       std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
 
       double ttrack= std::chrono::duration_cast<std::chrono::duration<double> >(t2 - t1).count();
 
+      cv::Mat Vel = SLAM.GetVelocity();
+
+      if (!Tcw.empty() && !Vel.empty()) {
+        cout << "Frame " << ni << ": " << Tcw.rowRange(0,3).col(3).t() <<
+          ", vel: " << Vel.rowRange(0,3).col(3).t() << endl;
+      }
       // Print the scale
       // cout << "Scale: " << SLAM.GetScale();
       // cout << "Gravity: " << SLAM.GetGravityVec().t();

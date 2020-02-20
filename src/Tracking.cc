@@ -735,19 +735,19 @@ namespace ORB_SLAM2
     } else {
       // System is initialized. Track Frame.
       bool bOK;
-      
+
       // Initial camera pose estimation using motion model or relocalization
       // (if tracking is lost)
       if (!mbOnlyTracking) {
         // Local Mapping is activated. This is the normal behaviour, unless
         // you explicitly activate the "only tracking" mode.
-        
         if (mState == OK) {
           // Local Mapping might have changed some MapPoints tracked in last frame
           CheckReplacedInLastFrame();
-          
+
           // See if the Visual-Inertial is initialized
           if (mpLocalMapper->GetVINSInited()) {
+          // if (mpLocalMapper->GetScale() != 1.0) {
             // 20 Frames after reloc, track with only vision
             // mbRelocBiasPrepareRepresents 20 consecutive frames being prepared for estimating bias
             if (mbRelocBiasPrepare) {
@@ -2187,6 +2187,8 @@ namespace ORB_SLAM2
     mbOnlyTracking = flag;
   }
 
-
+cv::Mat Tracking::GetVelocity() {
+  return mVelocity;
+}
 
 } //namespace ORB_SLAM

@@ -77,6 +77,8 @@ public:
                                            const std::vector<IMUData>& vIMUSInceLastKF);
   IMUPreintegrator GetIMUPreIntSinceLastFrame(Frame* pCurF, Frame* pLastF);
 
+  cv::Mat GetVelocity();
+
 public:
     Tracking(System* pSys, ORBVocabulary* pVoc, FrameDrawer* pFrameDrawer, 
              MapDrawer* pMapDrawer, Map* pMap,

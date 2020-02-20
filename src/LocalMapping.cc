@@ -30,9 +30,9 @@ namespace ORB_SLAM2
 
   LocalMapping::LocalMapping(Map *pMap, const float bMonocular,
                              ConfigParam* pParams, bool bUseImu):
-    mbFirstTry(true), mbVINSInited(false), mbFirstVINSInited(false),
-    mbMapUpdateFlagForTracking(false), mbUseImu(bUseImu),
-    mbMonocular(bMonocular), mbResetRequested(false),
+    mbFirstTry(true), mnVINSInitScale(1.0), mbVINSInited(false),
+    mbFirstVINSInited(false), mbMapUpdateFlagForTracking(false),
+    mbUseImu(bUseImu), mbMonocular(bMonocular), mbResetRequested(false),
     mbFinishRequested(false), mbFinished(true), mpMap(pMap),
     mbAbortBA(false), mbStopped(false), mbStopRequested(false), 
     mbNotStop(false), mbAcceptKeyFrames(true)
@@ -372,6 +372,13 @@ namespace ORB_SLAM2
       bVIOInited = true;
     }
 
+    // Set the scale if it makes sense
+    if (sstar > 0 && abs(cv::norm(gwstar) - ConfigParam::GetG()) < 0.2 &&
+        s_ > 0) {
+      mnVINSInitScale = s_;
+    }
+
+
     // When failed. Or when you're debugging.
     // Reset biasg to zero, and re-compute imu-preintegrator.
     if (!bVIOInited) {
@@ -487,6 +494,10 @@ namespace ORB_SLAM2
 
   double LocalMapping::GetScale() {
     return mnVINSInitScale;
+  }
+
+  void LocalMapping::SetUseImu(bool bflag) {
+    mbUseImu = bflag;
   }
 
   bool LocalMapping::GetMapUpdateFlagForTracking() {

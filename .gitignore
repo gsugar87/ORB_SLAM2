@@ -21,8 +21,10 @@ Thirdparty/g2o/lib/
 Thirdparty/backup
 Vocabulary/ORBvoc.txt
 Vocabulary/ORBvoc.bin
+Vocabulary/bin_vocabulary
 build/
 build_debug/
+build_test/
 *~
 lib/
 
