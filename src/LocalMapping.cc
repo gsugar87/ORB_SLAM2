@@ -369,6 +369,7 @@ namespace ORB_SLAM2
     // Todo:
     // Add some logic or strategy to confirm init status
     bool bVIOInited = false;
+    bool goodInit = false;
     if (mbFirstTry) {
       mbFirstTry = false;
       mnStartTime = mpCurrentKeyFrame->mTimeStamp;
@@ -381,9 +382,16 @@ namespace ORB_SLAM2
     // Set the scale if it makes sense
     if (sstar > 0 && abs(cv::norm(gwstar) - ConfigParam::GetG()) < 0.2 &&
         s_ > 0) {
-      mnVINSInitScale = s_;
+      goodInit = true;
     }
 
+    if (goodInit) {
+      // Set NavState , scale and bias for all KeyFrames
+      // Scale
+      mnVINSInitScale = s_;
+      // gravity vector in world frame
+      mGravityVec = Rwi_*GI;
+    }
 
     // When failed. Or when you're debugging.
     // Reset biasg to zero, and re-compute imu-preintegrator.
@@ -394,7 +402,7 @@ namespace ORB_SLAM2
         pKF->SetNavStateBiasGyr(Vector3d::Zero());
         pKF->SetNavStateBiasAcc(Vector3d::Zero());
         pKF->SetNavStateDeltaBg(Eigen::Vector3d::Zero());
-            pKF->SetNavStateDeltaBa(Eigen::Vector3d::Zero());
+        pKF->SetNavStateDeltaBa(Eigen::Vector3d::Zero());
       }
       for (vector<KeyFrame*>::const_iterator vit=vScaleGravityKF.begin(),
              vend=vScaleGravityKF.end(); vit!=vend; vit++) {

@@ -871,13 +871,12 @@ namespace ORB_SLAM2
     }
 
     // It's actualy a linear estimator, so 1 iteration is enough.
-    optimizer.setVerbose(true);
+    //optimizer.setVerbose(true);
     optimizer.initializeOptimization();
     optimizer.optimize(1);
 
     g2o::VertexGyrBias * vBgEst = static_cast<g2o::VertexGyrBias*>(optimizer.vertex(0));
-    cout << "vBgEst: " << vBgEst->estimate().transpose() << endl;
-    cout << "vBiasg: " << vBiasg->estimate().transpose() << endl;
+
     return vBgEst->estimate();
   }
 
