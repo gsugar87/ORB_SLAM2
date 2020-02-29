@@ -44,6 +44,9 @@ namespace ORB_SLAM2
 
   void LocalMapping::AddToLocalWindow(KeyFrame* pKF) {
     mlLocalKeyFrames.push_back(pKF);
+    if (pKF->mnId > 1e4) {
+      cout << "Weird keyframe id: " << pKF->mnId << endl;
+    }
     if (mlLocalKeyFrames.size() > mnLocalWindowSize) {
       mlLocalKeyFrames.pop_front();
     }
@@ -55,6 +58,9 @@ namespace ORB_SLAM2
       KeyFrame* pKF = *lit;
       //Test log
       if(!pKF) cout<<"pKF null?"<<endl;
+      if (pKF->mnId > 1e4) {
+        cout << "Weird keyframe id: " << pKF->mnId << endl;
+      }
       if (pKF->isBad()) {
         lit = mlLocalKeyFrames.erase(lit);
       } else {
@@ -1270,6 +1276,10 @@ namespace ORB_SLAM2
         mlNewKeyFrames.clear();
         mlpRecentAddedMapPoints.clear();
         mbResetRequested=false;
+
+        mlLocalKeyFrames.clear();
+        mbVINSInited = false;
+        mbFirstTry = true;
       }
   }
 

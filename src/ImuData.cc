@@ -21,11 +21,22 @@ namespace ORB_SLAM2
    */
 
   // *1e3/*1e2 chosen by experiments
-  double IMUData::_gyrBiasRw2 = 2.0e-5*2.0e-5/**10*/;  //2e-12*1e3
-  double IMUData::_accBiasRw2 = 5.0e-3*5.0e-3/**10*/;  //4.5e-8*1e2
+  // double IMUData::_gyrBiasRw2 = 2.0e-5*2.0e-5/**10*/;  //2e-12*1e3
+  // double IMUData::_accBiasRw2 = 5.0e-3*5.0e-3/**10*/;  //4.5e-8*1e2
 
-  Matrix3d IMUData::_gyrMeasCov = Matrix3d::Identity()*1.7e-4*1.7e-4/0.005/**100*/;       // sigma_g * sigma_g / dt, ~6e-6*10
-  Matrix3d IMUData::_accMeasCov = Matrix3d::Identity()*2.0e-3*2.0e-3/0.005*100;       // sigma_a * sigma_a / dt, ~8e-4*10
+
+  double gyro_noise_dens = 1.6968e-4; // rad/sec/sqrt(Hz)
+  double acc_noise_dens = 2.0e-3;  // m/s^2/sqrt(Hz)
+  double dt = 0.005;  // frame rate 200 Hz = 0.005 sec
+  double gyro_rw = 1.9393e-5;
+  double acc_rw = 3.0e-3;
+  double IMUData::_gyrBiasRw2 = gyro_rw*gyro_rw;
+  double IMUData::_accBiasRw2 = acc_rw*acc_rw;
+
+  // Matrix3d IMUData::_gyrMeasCov = Matrix3d::Identity()*0.0135// 1.7e-4*1.7e-4/0.005/**100*/;       // sigma_g * sigma_g / dt, ~6e-6*10
+  // Matrix3d IMUData::_accMeasCov = Matrix3d::Identity()*2.0e-3*2.0e-3/0.005*100;       // sigma_a * sigma_a / dt, ~8e-4*10
+  Matrix3d IMUData::_gyrMeasCov = Matrix3d::Identity()*gyro_noise_dens*gyro_noise_dens/dt;
+  Matrix3d IMUData::_accMeasCov = Matrix3d::Identity()*acc_noise_dens*acc_noise_dens/dt;
 
   // covariance of bias random walk
   Matrix3d IMUData::_gyrBiasRWCov = Matrix3d::Identity()*_gyrBiasRw2;     // sigma_gw * sigma_gw * dt, ~2e-12

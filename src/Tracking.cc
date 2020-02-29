@@ -921,7 +921,7 @@ namespace ORB_SLAM2
         mlpTemporalPoints.clear();
 
         // Check if we need to insert a new keyframe
-        if (NeedNewKeyFrame() || mbCreateNewKFAfterReloc) {
+        if (NeedNewKeyFrame() || mbCreateNewKFAfterReloc || mpMap->KeyFramesInMap() < ConfigParam::GetLocalWindowSize()) {
           CreateNewKeyFrame();
         }
         // Clear flag
@@ -947,7 +947,7 @@ namespace ORB_SLAM2
       // Reset if the camera get lost soon after initialization
       if (mState==LOST) {
         // if (mpMap->KeyFramesInMap() <= 5) {
-        if (!mpLocalMapper->GetVINSInited()) {
+        if (!mpLocalMapper->GetVINSInited() && mpMap->KeyFramesInMap() <= 5) {
           cout << "Track lost soon after initialisation, reseting..." << endl;
           mpSystem->Reset();
           return;

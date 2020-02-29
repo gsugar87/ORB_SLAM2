@@ -131,7 +131,7 @@ int main(int argc, char **argv) {
         iImu++;
       }
       // cout << "Imu buffer size for image " << ni << ": " << vBufferImuData.size() << endl;
-
+      /*
       if (ni % 50 == 0) {
         if (useImu) {
           useImu = false;
@@ -142,7 +142,7 @@ int main(int argc, char **argv) {
         }
         SLAM.SetUseImu(useImu);
       }
-
+      */
       std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
 
       // Pass the image to the SLAM system
